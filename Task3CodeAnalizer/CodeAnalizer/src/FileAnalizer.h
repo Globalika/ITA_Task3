@@ -10,11 +10,11 @@ namespace fs = std::filesystem;
 class FileAnalizer
 {
 public:
-	//Count lines// return tuple (blank, comment, code lines)
-	std::tuple<int, int, int> CountFileLines(fs::path);
+	/*Count lines. return tuple (blank, comment and code lines)*/
+	std::tuple<int, int, int> CountFileLines(fs::path& path);
 	enum class CheckType;
-	void DefineLineTypeRecursive(std::string line, CheckType& type, bool quotesOpen = false);
 	void DefineLineType(std::string& line, CheckType& type);
+	void DefineLineTypeRecursive(std::string line, CheckType& type, bool quotesOpen = false);
 	enum class CheckType
 	{
 		NO_CHECK,

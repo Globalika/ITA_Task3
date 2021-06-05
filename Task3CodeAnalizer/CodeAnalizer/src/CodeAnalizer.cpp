@@ -1,6 +1,6 @@
 #include "CodeAnalizer.h"
 
-bool Analyzer::Analize(std::string rootPath, std::string resultPath)
+bool CodeAnalyzer::Analize(std::string& rootPath, std::string& resultPath)
 {
 	m_rootPath = rootPath;
 	m_resultPath = resultPath;
@@ -10,14 +10,14 @@ bool Analyzer::Analize(std::string rootPath, std::string resultPath)
 	else 
 	{
 		const auto start = time.now();
-		if (!AddFilePathsToQueue()) {
+		if (!AddFilePathsToQueue(m_rootPath)) {
 			return false;
 		}
 		else {
 			SpawnThreads();
 			const auto end = time.now();
 			elapsedTime = static_cast<std::chrono::duration<double>>(end - start);
-			if (!WriteInfoInFile(resultPath)) {
+			if (!WriteInfoInFile(m_resultPath)) {
 				return false;
 			}
 			else {
@@ -27,35 +27,48 @@ bool Analyzer::Analize(std::string rootPath, std::string resultPath)
 	}
 }
 
-bool Analyzer::AddFilePathsToQueue()
+bool CodeAnalyzer::AddFilePathsToQueue(fs::path& path)
 {
-	if (!exists(m_rootPath)) {
+	if (!exists(path)) {
 		return false;
 	}
 	else {
-		for (auto& x : fs::recursive_directory_iterator(m_rootPath))
+		if (fs::is_regular_file(path))
 		{
-			if (CheckFileExtension(x.path()) == true) {
-				pathsQueue.push(x);
+			if (CheckFileExtension(path) == true) {
+				pathsQueue.push(path);
 				processedFiles++;
+			}
+		}
+		else
+		{
+			for (auto& x : fs::recursive_directory_iterator(path))
+			{
+				fs::path path = x.path();
+				if (CheckFileExtension(path) == true) {
+					pathsQueue.push(x);
+					processedFiles++;
+				}
 			}
 		}
 		return true;
 	}
 }
 
-bool Analyzer::CheckFileExtension(fs::path path)
+bool CodeAnalyzer::CheckFileExtension(fs::path& p)
 {
-	if (path.extension() == ".c" || path.extension() == ".h" ||
-		path.extension() == ".cpp" || path.extension() == ".hpp")
+	auto path = p.extension();
+	if (path == c || path == h ||
+		path == cpp || path == hpp)
 	{
 		return true;
 	}
 	return false;
 }
 
-void Analyzer::SpawnThreads()
+void CodeAnalyzer::SpawnThreads()
 {
+	unsigned int threadsCount = (processedFiles < std::thread::hardware_concurrency()) ? (processedFiles) : (std::thread::hardware_concurrency());
 	for (unsigned int i = 0; i < threadsCount; i++)
 	{
 		threadsVector.push_back(std::thread([this]
@@ -70,32 +83,34 @@ void Analyzer::SpawnThreads()
 	}
 }
 
-void Analyzer::ProcessFiles()
+void CodeAnalyzer::ProcessFiles()
 {
-	while (!pathsQueue.empty())
+	do
 	{
 		fs::path path = GetPathFromQueue();
+		if (path.empty()) 
+		{
+			break;
+		}
 		auto info = fileAnalizer.CountFileLines(path);
 		RecordAnalysisResult(info);
-	}
+	} while (true);
 }
 
-fs::path Analyzer::GetPathFromQueue()
+fs::path CodeAnalyzer::GetPathFromQueue()
 {
+	std::lock_guard<std::mutex> lockQ(mQueue);
+	fs::path path;
 	if (!pathsQueue.empty())
 	{
-		std::lock_guard<std::mutex> lockQ(mQueue);
-		if (!pathsQueue.empty())
-		{
-			fs::path path = pathsQueue.front();
-			pathsQueue.pop();
-			return path;
-		}
+		path = pathsQueue.front();
+		pathsQueue.pop();
+		return path;
 	}
-	return "";
+	return path;
 }
 
-void Analyzer::RecordAnalysisResult(std::tuple<int, int, int> info)
+void CodeAnalyzer::RecordAnalysisResult(std::tuple<int, int, int> info)
 {
 	std::lock_guard<std::mutex> lockL(mLines);
 	blankLines += std::get<0>(info);
@@ -103,12 +118,15 @@ void Analyzer::RecordAnalysisResult(std::tuple<int, int, int> info)
 	codeLines += std::get<2>(info);
 }
 
-bool Analyzer::WriteInfoInFile(std::filesystem::path path)
+
+
+bool CodeAnalyzer::WriteInfoInFile(fs::path& path)
 {
-	if (!std::filesystem::exists(path)) {
+	if (!fs::exists(path)) {
 		return false;
 	}
-	else {
+	else 
+	{
 		fs::path result = m_resultPath.append("result.txt");
 		std::fstream out(result, std::ios::out, std::ios::trunc);
 		out << "Directory path : " << m_rootPath << '\n';

@@ -1,11 +1,9 @@
 #include "FileAnalizer.h"
 
-std::tuple<int, int, int> FileAnalizer::CountFileLines(fs::path path)
+std::tuple<int, int, int> FileAnalizer::CountFileLines(fs::path& path)
 {
-	std::string line = "";
-
+	std::string line;
 	CheckType type = CheckType::NO_CHECK;
-
 	int comLines = 0;
 	int codeLines = 0;
 	int blankLines = 0;
@@ -108,6 +106,7 @@ void FileAnalizer::DefineLineTypeRecursive(std::string line, CheckType& type, bo
 						type = CheckType::CODE_AND_COMMENT_OPEN;
 					}
 				DefineLineTypeRecursive(line.substr(i + 2, line.size()), type, quotesOpen);
+				return;
 			}
 			else {
 				continue;
@@ -115,8 +114,9 @@ void FileAnalizer::DefineLineTypeRecursive(std::string line, CheckType& type, bo
 		}
 		else if ((line.at(i) == '*' && line.at(i + 1) == '/'))
 		{
-			if (!quotesOpen) {
-				std::string subLine = line.substr(i, line.size());
+			if (!quotesOpen) 
+			{
+				std::string subLine = line.substr(i + 2, line.size());
 				if ((std::regex_match(subLine, blank_line_regex)) &&
 					(type == CheckType::COMMENT_OPEN))
 				{
