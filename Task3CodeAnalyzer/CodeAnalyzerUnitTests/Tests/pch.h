@@ -7,8 +7,7 @@
 #ifndef PCH_H
 #define PCH_H
 
-#include "../../Task3CodeAnalizer/CodeAnalizer/src/CodeAnalizer.h"
-#include <filesystem>
+#include "..\..\CodeAnalyzer\src\CodeAnalyzer.h"
 // add headers that you want to pre-compile here
 
 #endif //PCH_H

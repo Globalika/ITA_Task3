@@ -1,12 +1,12 @@
-#include "FileAnalizer.h"
+#include "FileAnalyzer.h"
 
-std::tuple<int, int, int> FileAnalizer::CountFileLines(fs::path& path)
+std::tuple<int, int, int> FileAnalyzer::CountFileLines(fs::path& path)
 {
-	std::string line;
 	CheckType type = CheckType::NO_CHECK;
+	std::string line;
+	int blankLines = 0;
 	int comLines = 0;
 	int codeLines = 0;
-	int blankLines = 0;
 
 	std::ifstream f(path);
 	if (f.is_open())
@@ -46,7 +46,7 @@ std::tuple<int, int, int> FileAnalizer::CountFileLines(fs::path& path)
 	return std::make_tuple(0, 0, 0);
 }
 
-void FileAnalizer::DefineLineType(std::string& line, CheckType& type)
+void FileAnalyzer::DefineLineType(std::string& line, CheckType& type)
 {
 	if (std::regex_match(line, blank_line_regex) &&
 		((type != CheckType::COMMENT_OPEN) && (type != CheckType::CODE_AND_COMMENT_OPEN))) {
@@ -66,22 +66,23 @@ void FileAnalizer::DefineLineType(std::string& line, CheckType& type)
 	}
 }
 
-void FileAnalizer::DefineLineTypeRecursive(std::string line, CheckType& type, bool quotesOpen)
+void FileAnalyzer::DefineLineTypeRecursive(std::string& line, CheckType& type, bool quotesOpen)
 {
 	if (line.size() < 2) {
 		return;
 	}
 	for (int i = 0; i < line.size() - 1; i++)
 	{
+		std::string subLine2 = line.substr(i + 2, line.size());
+		std::string subLine = line.substr(0, i);
 		if ((line.at(i) != '\\') && (line.at(i + 1) == '"')) {
 			quotesOpen = !quotesOpen;
-			DefineLineTypeRecursive(line.substr(i + 2, line.size()), type, quotesOpen);
+			DefineLineTypeRecursive(subLine2, type, quotesOpen);
 		}
 		if ((line.at(i) == '/' && line.at(i + 1) == '/'))
 		{
 			if (!quotesOpen)
 			{
-				std::string subLine = line.substr(0, i);
 				if (std::regex_match(subLine, blank_line_regex)) {
 					type = CheckType::COMMENT_CLOSE;
 				}
@@ -98,14 +99,13 @@ void FileAnalizer::DefineLineTypeRecursive(std::string line, CheckType& type, bo
 		{
 			if (!quotesOpen)
 			{
-				std::string subLine = line.substr(0, i);
-					if (std::regex_match(subLine, blank_line_regex)) {
-						type = CheckType::COMMENT_OPEN;
-					}
-					else {
-						type = CheckType::CODE_AND_COMMENT_OPEN;
-					}
-				DefineLineTypeRecursive(line.substr(i + 2, line.size()), type, quotesOpen);
+				if (std::regex_match(subLine, blank_line_regex)) {
+					type = CheckType::COMMENT_OPEN;
+				}
+				else {
+					type = CheckType::CODE_AND_COMMENT_OPEN;
+				}
+				DefineLineTypeRecursive(subLine2, type, quotesOpen);
 				return;
 			}
 			else {
@@ -114,7 +114,7 @@ void FileAnalizer::DefineLineTypeRecursive(std::string line, CheckType& type, bo
 		}
 		else if ((line.at(i) == '*' && line.at(i + 1) == '/'))
 		{
-			if (!quotesOpen) 
+			if (!quotesOpen)
 			{
 				std::string subLine = line.substr(i + 2, line.size());
 				if ((std::regex_match(subLine, blank_line_regex)) &&

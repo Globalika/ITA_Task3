@@ -3,9 +3,9 @@
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
-namespace CodeAnalizerUnitTests
+namespace CodeAnalyzerUnitTests
 {
-	TEST_CLASS(FilesLineCheckUnitTests)
+	TEST_CLASS(FilesLineUnitTests)
 	{
 	public:
 		TEST_METHOD(File_With_Blank_Lines_Check)
@@ -75,18 +75,18 @@ namespace CodeAnalizerUnitTests
 			Assert::AreEqual(expectedCodeLines, actualCodeLines);
 		}
 	private:
-		FileAnalizer analyzer;
+		FileAnalyzer analyzer;
 		const fs::path solutionPath = fs::current_path();
 		fs::path emptyFilepath = solutionPath.parent_path().parent_path()
-			+= "/Task3CodeAnalizer/CodeAnalizerUnitTests/FilesExamples/emptyFile.cpp";
+			+= "/Task3CodeAnalyzer/CodeAnalyzerUnitTests/FileExamples/emptyFile.cpp";
 		fs::path fileWithCodeOnlypath = solutionPath.parent_path().parent_path()
-			+= "/Task3CodeAnalizer/CodeAnalizerUnitTests/FilesExamples/fileWithCodeOnly.cpp";
+			+= "/Task3CodeAnalyzer/CodeAnalyzerUnitTests/FileExamples/fileWithCodeOnly.cpp";
 		fs::path fileWithCommentOnlyPath = solutionPath.parent_path().parent_path()
-			+= "/Task3CodeAnalizer/CodeAnalizerUnitTests/FilesExamples/fileWithCommentOnly.cpp";
+			+= "/Task3CodeAnalyzer/CodeAnalyzerUnitTests/FileExamples/fileWithCommentOnly.cpp";
 		fs::path fileWithMixLinesPath = solutionPath.parent_path().parent_path()
-			+= "/Task3CodeAnalizer/CodeAnalizerUnitTests/FilesExamples/fileWithMixLines.cpp";
+			+= "/Task3CodeAnalyzer/CodeAnalyzerUnitTests/FileExamples/fileWithMixLines.cpp";
 		fs::path fileWithCodeAndCommentLinesPath = solutionPath.parent_path().parent_path()
-			+= "/Task3CodeAnalizer/CodeAnalizerUnitTests/FilesExamples/fileWithCodeAndCommentLinesPath.cpp";
+			+= "/Task3CodeAnalyzer/CodeAnalyzerUnitTests/FileExamples/fileWithCodeAndCommentLinesPath.cpp";
 		int expectedBlankLines = 0;
 		int expectedCommentLines = 0;
 		int expectedCodeLines = 0;

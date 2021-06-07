@@ -1,0 +1,6 @@
+Directory path : "C:\\Users\\volod\\source\\ITA_Task3/Task3CodeAnalyzer/CodeAnalyzerUnitTests/FileExamples/emptyFile.cpp"
+Processed files : 1
+Blank lines : 3
+Comment lines : 0
+Code lines : 0
+Elapsed time : 0.0009656 seconds

@@ -1,13 +1,14 @@
-#include "CodeAnalizer.h"
+#include "CodeAnalyzer.h"
 
 bool CodeAnalyzer::Analize(std::string& rootPath, std::string& resultPath)
 {
+	ClearUp();
 	m_rootPath = rootPath;
 	m_resultPath = resultPath;
 	if (!fs::exists(rootPath) || !fs::exists(resultPath)) {
 		return false;
 	}
-	else 
+	else
 	{
 		const auto start = time.now();
 		if (!AddFilePathsToQueue(m_rootPath)) {
@@ -24,6 +25,31 @@ bool CodeAnalyzer::Analize(std::string& rootPath, std::string& resultPath)
 				return true;
 			}
 		}
+	}
+}
+
+void CodeAnalyzer::ClearUp()
+{
+	if (!threadsVector.empty()) {
+		threadsVector.clear();
+	}
+	if (commentLines != 0) {
+		commentLines = 0;
+	}
+	if (codeLines != 0) {
+		codeLines = 0;
+	}
+	if (blankLines != 0) {
+		blankLines = 0;
+	}
+	if (!m_rootPath.empty()) {
+		m_rootPath.clear();
+	}
+	if (!m_resultPath.empty()) {
+		m_resultPath.clear();
+	}
+	if (processedFiles != 0) {
+		processedFiles = 0;
 	}
 }
 
@@ -57,9 +83,9 @@ bool CodeAnalyzer::AddFilePathsToQueue(fs::path& path)
 
 bool CodeAnalyzer::CheckFileExtension(fs::path& p)
 {
-	auto path = p.extension();
-	if (path == c || path == h ||
-		path == cpp || path == hpp)
+	auto extension = p.extension();
+	if (extension == c || extension == h ||
+		extension == cpp || extension == hpp)
 	{
 		return true;
 	}
@@ -88,11 +114,11 @@ void CodeAnalyzer::ProcessFiles()
 	do
 	{
 		fs::path path = GetPathFromQueue();
-		if (path.empty()) 
+		if (path.empty())
 		{
 			break;
 		}
-		auto info = fileAnalizer.CountFileLines(path);
+		auto info = fileAnalyzer.CountFileLines(path);
 		RecordAnalysisResult(info);
 	} while (true);
 }
@@ -118,14 +144,12 @@ void CodeAnalyzer::RecordAnalysisResult(std::tuple<int, int, int> info)
 	codeLines += std::get<2>(info);
 }
 
-
-
 bool CodeAnalyzer::WriteInfoInFile(fs::path& path)
 {
 	if (!fs::exists(path)) {
 		return false;
 	}
-	else 
+	else
 	{
 		fs::path result = m_resultPath.append("result.txt");
 		std::fstream out(result, std::ios::out, std::ios::trunc);
