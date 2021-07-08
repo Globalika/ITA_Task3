@@ -5,7 +5,7 @@ int main()
 {
 	std::string pathLnu = "C:/Users/volod/source/Lnu_VS";
 
-	std::string result = "C:/Users/volod/source/ITA_Task3/Task3CodeAnalyzer/UserProject/src";
+	std::string result = "C:/Users/volod/source/ITA/ITA_Task3/Task3CodeAnalyzer/UserProject/src";
 
 	CodeAnalyzer analyzer;
 

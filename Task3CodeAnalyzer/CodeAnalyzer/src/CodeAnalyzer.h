@@ -38,10 +38,10 @@ private:
 	[[nodiscard]] bool WriteInfoInFile(fs::path& path);
 
 	FileAnalyzer fileAnalyzer;
-	unsigned int processedFiles = 0;
-	unsigned int blankLines = 0;
-	unsigned int commentLines = 0;
-	unsigned int codeLines = 0;
+	unsigned int m_processedFiles = 0;
+	unsigned int m_blankLines = 0;
+	unsigned int m_commentLines = 0;
+	unsigned int m_codeLines = 0;
 	std::filesystem::path m_rootPath;
 	std::filesystem::path m_resultPath;
 	const std::chrono::steady_clock time{};
@@ -50,10 +50,6 @@ private:
 	std::vector<std::thread> threadsVector;
 	std::mutex mLines;
 	std::mutex mQueue;
-	const std::string c = ".c";
-	const std::string h = ".h";
-	const std::string cpp = ".cpp";
-	const std::string hpp = ".hpp";
 };
 
 #endif // CODE_ANALIZER

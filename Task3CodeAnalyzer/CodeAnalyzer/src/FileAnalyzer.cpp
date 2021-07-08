@@ -11,7 +11,8 @@ std::tuple<int, int, int> FileAnalyzer::CountFileLines(fs::path& path)
 	std::ifstream f(path);
 	if (f.is_open())
 	{
-		while (!f.eof()) {
+		while (!f.eof())
+		{
 			getline(f, line);
 			DefineLineType(line, type);
 			switch (type)
@@ -75,7 +76,8 @@ void FileAnalyzer::DefineLineTypeRecursive(std::string& line, CheckType& type, b
 	{
 		std::string subLine2 = line.substr(i + 2, line.size());
 		std::string subLine = line.substr(0, i);
-		if ((line.at(i) != '\\') && (line.at(i + 1) == '"')) {
+		if ((line.at(i) != '\\') && (line.at(i + 1) == '"'))
+		{
 			quotesOpen = !quotesOpen;
 			DefineLineTypeRecursive(subLine2, type, quotesOpen);
 		}
